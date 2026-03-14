@@ -8,6 +8,19 @@ export interface SubagentInfo {
   activityEvents?: Array<{ key: string; text: string; at: number }>
 }
 
+export interface CronJobInfo {
+  key: string
+  jobId: string
+  label: string
+  isRunning: boolean
+  lastRunAt: number
+  nextRunAt?: number
+  durationMs?: number
+  lastStatus: 'success' | 'running' | 'failed'
+  lastSummary?: string
+  consecutiveFailures: number
+}
+
 export interface AgentActivity {
   agentId: string
   name: string
@@ -17,6 +30,7 @@ export interface AgentActivity {
   toolStatus?: string
   lastActive: number
   subagents?: SubagentInfo[]
+  cronJobs?: CronJobInfo[]
 }
 
 /** Track which subagent keys were active last sync, per parent agent */

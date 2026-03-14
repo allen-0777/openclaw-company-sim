@@ -1322,6 +1322,13 @@ export default function PixelOfficePage() {
               if (cid === charId) {
                 selectedAgentOpenedAtRef.current = performance.now()
                 setSelectedAgentId(aid)
+                // Also open interaction panel on direct click
+                const agentData = agents.find(a => a.agentId === aid)
+                if (agentData) {
+                  setBossPanelAgent({ id: aid, name: agentData.name, emoji: agentData.emoji })
+                  setBossPanelMessages([])
+                  setBossPanelLogs([])
+                }
                 found = true
                 break
               }
@@ -2045,6 +2052,8 @@ export default function PixelOfficePage() {
           onSendCommand={handleBossCommand}
           logs={bossPanelLogs}
           messages={bossPanelMessages}
+          agentDetail={agents.find(a => a.agentId === bossPanelAgent.id)}
+          agentStats={agentStatsRef.current.get(bossPanelAgent.id)}
         />
       )}
       {/* Quest Board */}
