@@ -22,8 +22,9 @@ function extractUserText(content: unknown[]): string {
     const b = block as Record<string, unknown>;
     if (b.type !== "text" || typeof b.text !== "string") continue;
     let text = b.text;
+    // Strip leading metadata prefix like "[Sat 2026-03-14 22:26 GMT+8] " or "[Sender (untrusted metadata)...] "
     const metaEnd = text.indexOf("] ");
-    if (text.includes("Sender (untrusted metadata)") && metaEnd > 0) {
+    if (text.startsWith("[") && metaEnd > 0) {
       text = text.slice(metaEnd + 2);
     }
     return text.trim();
