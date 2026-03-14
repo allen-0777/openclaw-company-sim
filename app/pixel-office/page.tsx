@@ -31,6 +31,7 @@ import {
 import { loadCharacterPNGs, loadWallPNG } from '@/lib/pixel-office/sprites/pngLoader'
 import { useOfficeWebSocket } from '@/lib/pixel-office/useOfficeWebSocket'
 import { useI18n } from '@/lib/i18n'
+import { QuestBoard } from '@/app/components/pixel-office/QuestBoard'
 import { EditorToolbar } from './components/EditorToolbar'
 import { EditActionBar } from './components/EditActionBar'
 import { BossInteractionPanel } from './components/BossInteractionPanel'
@@ -227,6 +228,8 @@ export default function PixelOfficePage() {
   const officeReadyRef = useRef<boolean>(false)
   const prevAgentStatesRef = useRef<Map<string, string>>(new Map(cachedPrevAgentStates))
   const seenSubagentEventKeysRef = useRef<Map<string, number>>(new Map())
+  const seenChatMessageIdsRef = useRef<Set<string>>(new Set())
+  const lastChatPollTsRef = useRef<Record<string, number>>({})
 
   const [agents, setAgents] = useState<AgentActivity[]>(cachedAgents)
   const [hoveredAgentId, setHoveredAgentId] = useState<number | null>(null)
@@ -249,6 +252,7 @@ export default function PixelOfficePage() {
   const providerAccessModeRef = useRef<Record<string, 'auth' | 'api_key'>>({})
   const providersRef = useRef<Array<{ id: string; api: string; models: Array<{ id: string; name: string; contextWindow?: number }>; usedBy: Array<{ id: string; emoji: string; name: string }> }>>([])
   const [isEditMode, setIsEditMode] = useState(cachedIsEditMode)
+  const [showQuestBoard, setShowQuestBoard] = useState(false)
   const [soundOn, setSoundOn] = useState(true)
   const [editorTick, setEditorTick] = useState(0)
   const [officeReady, setOfficeReady] = useState(false)
@@ -849,6 +853,46 @@ export default function PixelOfficePage() {
     const interval = setInterval(fetchAgents, AGENT_ACTIVITY_POLL_INTERVAL_MS)
     return () => clearInterval(interval)
   }, [])
+
+  // Poll chat messages from all active agents and inject as floating bubbles
+  useEffect(() => {
+    const CHAT_POLL_MS = 3000
+    const initializedAgents = new Set<string>()
+    const pollChatMessages = async () => {
+      const office = officeRef.current
+      if (!office || !officeReadyRef.current) return
+      const currentAgents = agents.filter(a => a.state === 'working' || a.state === 'idle')
+      for (const agent of currentAgents) {
+        const charId = agentIdMapRef.current.get(agent.agentId)
+        if (typeof charId !== 'number') continue
+        try {
+          const since = lastChatPollTsRef.current[agent.agentId] || 0
+          const res = await fetch(`/api/agent-messages?agentId=${encodeURIComponent(agent.agentId)}&since=${since}`)
+          if (!res.ok) continue
+          const data = await res.json()
+          const msgs: Array<{ id: string; role: string; text: string; timestamp: number }> = data.messages || []
+          const seen = seenChatMessageIdsRef.current
+          const isFirstPoll = !initializedAgents.has(agent.agentId)
+          let maxTs = since
+          for (const m of msgs) {
+            if (seen.has(m.id)) continue
+            seen.add(m.id)
+            if (m.timestamp > maxTs) maxTs = m.timestamp
+            if (!isFirstPoll) {
+              const label = m.role === 'user' ? '💬' : '🤖'
+              const preview = m.text.length > 60 ? m.text.slice(0, 57) + '...' : m.text
+              office.pushCodeSnippet(charId, `${label} ${preview}`)
+            }
+          }
+          if (maxTs > since) lastChatPollTsRef.current[agent.agentId] = maxTs
+          initializedAgents.add(agent.agentId)
+        } catch { /* ignore */ }
+      }
+    }
+    pollChatMessages()
+    const timer = setInterval(pollChatMessages, CHAT_POLL_MS)
+    return () => clearInterval(timer)
+  }, [agents])
 
   // Poll agent session stats from /api/config
   useEffect(() => {
@@ -1937,9 +1981,32 @@ export default function PixelOfficePage() {
     )
   }
 
+  // Auto-sync external session messages when BossInteractionPanel opens
+  useEffect(() => {
+    if (!bossPanelAgent) return
+    let cancelled = false
+    const syncExternal = async () => {
+      try {
+        const res = await fetch(`/api/agent-messages?agentId=${encodeURIComponent(bossPanelAgent.id)}`)
+        if (!res.ok || cancelled) return
+        const data = await res.json()
+        const msgs: Array<{ id: string; role: string; text: string; timestamp: number }> = data.messages || []
+        if (msgs.length > 0 && !cancelled) {
+          const mapped = msgs.map(m => ({
+            role: (m.role === 'user' ? 'user' : 'agent') as 'user' | 'agent',
+            content: m.text,
+          }))
+          setBossPanelMessages(mapped)
+        }
+      } catch { /* ignore */ }
+    }
+    syncExternal()
+    const timer = setInterval(syncExternal, 4000)
+    return () => { cancelled = true; clearInterval(timer) }
+  }, [bossPanelAgent])
+
   const handleBossCommand = async (cmd: string) => {
     if (!bossPanelAgent) return
-    // Optimistically add user message
     setBossPanelMessages(prev => [...prev, { role: 'user', content: cmd }])
     try {
       const res = await fetch('/api/test-session', {
@@ -1979,6 +2046,10 @@ export default function PixelOfficePage() {
           logs={bossPanelLogs}
           messages={bossPanelMessages}
         />
+      )}
+      {/* Quest Board */}
+      {showQuestBoard && (
+        <QuestBoard onClose={() => setShowQuestBoard(false)} />
       )}
       {/* Floating photo comment DOM bubbles */}
       {floatingCommentsRef.current.map(fc => (
@@ -2043,6 +2114,11 @@ export default function PixelOfficePage() {
                   : 'bg-[var(--card)] border-[var(--border)] text-[var(--text-muted)]'
               }`}>
               {isEditMode ? t('pixelOffice.exitEdit') : t('pixelOffice.editMode')}
+            </button>
+            <button onClick={() => setShowQuestBoard(true)}
+              className="px-3 py-1.5 text-xs rounded-lg border transition-colors bg-[var(--card)] border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent)]"
+              title={t('quest.board.title')}>
+              📜
             </button>
           </div>
         </div>

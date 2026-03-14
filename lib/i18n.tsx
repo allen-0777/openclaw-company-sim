@@ -289,6 +289,22 @@ const translations: Record<Locale, Record<string, string>> = {
     "gateway.downloadScript": "下載安裝腳本",
     "gateway.setupGuide": "請在終端機執行上述指令以安裝 OpenClaw。",
 
+    // quest board
+    "quest.board.title": "龍蝦養成手冊",
+    "quest.status.locked": "未解鎖",
+    "quest.status.active": "進行中",
+    "quest.status.completed": "已完成",
+    "quest.phase1.title": "Phase 1: 迴圈基礎",
+    "quest.phase1.desc": "學習如何啟動你的第一隻 OpenClaw 龍蝦，並讓它學會使用工具。",
+    "quest.s01.title": "Agent Loop",
+    "quest.s01.desc": "Agent Loop 是龍蝦的心臟。嘗試啟動一個 Agent 並讓它回應你的訊息。",
+    "quest.s01.task": "在「設定」頁面新增一個 Agent，並在「像素辦公室」與它對話。",
+    "quest.s02.title": "Tool Use",
+    "quest.s02.desc": "龍蝦需要鉗子才能做事。嘗試安裝一個 Skill 並讓 Agent 使用它。",
+    "quest.s02.task": "安裝任意 Skill (例如 Web Search)，並命令 Agent 執行相關任務。",
+    "quest.action.goConfig": "前往設定",
+    "quest.action.goChat": "前往對話",
+
     // pixel office
     "pixelOffice.title": "OpenClaw Agents 辦公室",
     "pixelOffice.editMode": "編輯版面",
@@ -332,7 +348,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "pixelOffice.gatewaySre.tip.degraded": "Gateway degraded: latency high",
     "pixelOffice.gatewaySre.tip.down": "Gateway down",
   },
-  zh: {
+  "zh": {
     // layout
     "site.title": "OpenClaw Bot Dashboard",
     "site.desc": "查看所有 OpenClaw 机器人配置",
@@ -616,6 +632,22 @@ const translations: Record<Locale, Record<string, string>> = {
     "gateway.downloadScript": "下载安装脚本",
     "gateway.setupGuide": "请在终端执行上述指令以安装 OpenClaw。",
 
+    // quest board
+    "quest.board.title": "龙虾养成手册",
+    "quest.status.locked": "未解锁",
+    "quest.status.active": "进行中",
+    "quest.status.completed": "已完成",
+    "quest.phase1.title": "Phase 1: 循环基础",
+    "quest.phase1.desc": "学习如何启动你的第一只 OpenClaw 龙虾，并让它学会使用工具。",
+    "quest.s01.title": "Agent Loop",
+    "quest.s01.desc": "Agent Loop 是龙虾的心脏。尝试启动一个 Agent 并让它回应你的消息。",
+    "quest.s01.task": "在“设置”页面新增一个 Agent，并在“像素办公室”与它对话。",
+    "quest.s02.title": "Tool Use",
+    "quest.s02.desc": "龙虾需要钳子才能做事。尝试安装一个 Skill 并让 Agent 使用它。",
+    "quest.s02.task": "安装任意 Skill (例如 Web Search)，并命令 Agent 执行相关任务。",
+    "quest.action.goConfig": "前往设置",
+    "quest.action.goChat": "前往对话",
+
     // pixel office
     "pixelOffice.title": "OpenClaw Agents办公室",
     "pixelOffice.editMode": "编辑布局",
@@ -659,7 +691,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "pixelOffice.gatewaySre.tip.degraded": "Gateway degraded: latency high",
     "pixelOffice.gatewaySre.tip.down": "Gateway down",
   },
-  en: {
+  "en": {
     // layout
     "site.title": "OpenClaw Bot Dashboard",
     "site.desc": "View all OpenClaw bot configurations",
@@ -942,6 +974,22 @@ const translations: Record<Locale, Record<string, string>> = {
     "gateway.commandCopied": "Copied!",
     "gateway.downloadScript": "Download Script",
     "gateway.setupGuide": "Run the command above in your terminal to install OpenClaw.",
+
+    // quest board
+    "quest.board.title": "Lobster Mastery Handbook",
+    "quest.status.locked": "Locked",
+    "quest.status.active": "Active",
+    "quest.status.completed": "Completed",
+    "quest.phase1.title": "Phase 1: Loop Basics",
+    "quest.phase1.desc": "Learn how to start your first OpenClaw Lobster and teach it to use tools.",
+    "quest.s01.title": "Agent Loop",
+    "quest.s01.desc": "Agent Loop is the heart of the lobster. Try starting an Agent and getting it to respond to your message.",
+    "quest.s01.task": "Add an Agent in the 'Config' page and chat with it in the 'Pixel Office'.",
+    "quest.s02.title": "Tool Use",
+    "quest.s02.desc": "Lobsters need claws to do things. Try installing a Skill and letting the Agent use it.",
+    "quest.s02.task": "Install any Skill (e.g. Web Search) and command the Agent to perform a related task.",
+    "quest.action.goConfig": "Go to Config",
+    "quest.action.goChat": "Go to Chat",
 
     // pixel office
     "pixelOffice.title": "OpenClaw Agents Office",
