@@ -2008,7 +2008,7 @@ export default function PixelOfficePage() {
       } catch { /* ignore */ }
     }
     syncExternal()
-    const timer = setInterval(syncExternal, 4000)
+    const timer = setInterval(syncExternal, 1500)
     return () => { cancelled = true; clearInterval(timer) }
   }, [bossPanelAgent])
 
@@ -2026,7 +2026,9 @@ export default function PixelOfficePage() {
         })
       })
       const data = await res.json()
-      if (res.ok && data.reply) {
+      // CLI fallback returns status-only replies (no actual content) — let polling pick up the real reply
+      const isCLIStatusOnly = typeof data.reply === 'string' && data.reply.startsWith('OK (')
+      if (res.ok && data.reply && !isCLIStatusOnly) {
         setBossPanelMessages(prev => [...prev, { role: 'agent', content: data.reply, elapsed: data.elapsed }])
       } else if (data.error) {
         setBossPanelMessages(prev => [...prev, { role: 'agent', content: `❌ Error: ${data.error}` }])
