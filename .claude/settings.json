@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/liyuchan/Desktop/OpenClaw-bot-review -path */lib/*.ts -o -path */lib/*.tsx)",
+      "Bash(grep -r \"phase\\\\|s01\\\\|s02\\\\|s03\\\\|stage\" /Users/liyuchan/Desktop/OpenClaw-bot-review/lib /Users/liyuchan/Desktop/OpenClaw-bot-review/app --include=*.ts --include=*.tsx)",
+      "Bash(grep -r \"officeState\\\\|gameLoop\\\\|engine\" /Users/liyuchan/Desktop/OpenClaw-bot-review/lib/pixel-office --include=*.ts --include=*.tsx)"
+    ]
+  }
+}
