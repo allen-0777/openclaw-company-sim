@@ -2021,7 +2021,7 @@ export default function PixelOfficePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           agentId: bossPanelAgent.id,
-          sessionKey: `agent:${bossPanelAgent.id}:boss-mode`,
+          sessionKey: `${bossPanelAgent.id}:main`,
           text: cmd,
         })
       })
