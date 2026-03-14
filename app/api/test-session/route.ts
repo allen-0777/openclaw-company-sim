@@ -46,7 +46,9 @@ export async function POST(req: Request) {
       const elapsed = Date.now() - startTime;
 
       if (!resp.ok) {
-        if (shouldFallbackToCli(resp, rawText)) {
+        // Only fallback to CLI for health checks (no text), not for real chat messages
+        const isChat = typeof text === "string" && text.trim().length > 0;
+        if (!isChat && shouldFallbackToCli(resp, rawText)) {
           const fallback = await testSessionViaCli(agentId);
           return NextResponse.json({
             status: fallback.ok ? "ok" : "error",
