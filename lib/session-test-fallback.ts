@@ -20,7 +20,7 @@ function extractCliReply(parsed: any, stdout: string): string {
   return (stdout || "(no reply)").trim().slice(0, 200);
 }
 
-export async function testSessionViaCli(agentId: string): Promise<{ ok: boolean; reply?: string; error?: string; elapsed: number }> {
+export async function testSessionViaCli(agentId: string, message?: string): Promise<{ ok: boolean; reply?: string; error?: string; elapsed: number }> {
   const startTime = Date.now();
   try {
     const { stdout, stderr } = await execOpenclaw([
@@ -28,10 +28,10 @@ export async function testSessionViaCli(agentId: string): Promise<{ ok: boolean;
       "--agent",
       agentId,
       "--message",
-      "Health check: reply with OK",
+      message?.trim() || "Health check: reply with OK",
       "--json",
       "--timeout",
-      "100",
+      message ? "120" : "30",
     ]);
     const elapsed = Date.now() - startTime;
     const parsed = parseJsonFromMixedOutput(`${stdout}\n${stderr || ""}`);
