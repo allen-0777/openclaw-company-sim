@@ -35,6 +35,8 @@ import { QuestBoard } from '@/app/components/pixel-office/QuestBoard'
 import { EditorToolbar } from './components/EditorToolbar'
 import { EditActionBar } from './components/EditActionBar'
 import { BossInteractionPanel } from './components/BossInteractionPanel'
+import { WorkbenchDock } from './components/WorkbenchDock'
+import { WorkbenchDrawer } from './components/WorkbenchDrawer'
 import {
   AgentCard,
   type AgentCardAgent,
@@ -287,7 +289,8 @@ export default function PixelOfficePage() {
   const [bossPanelAgent, setBossPanelAgent] = useState<{ id: string; name: string; emoji: string } | null>(null)
   const [bossPanelLogs, setBossPanelLogs] = useState<string[]>([])
   const [bossPanelMessages, setBossPanelMessages] = useState<{ role: 'user' | 'agent'; content: string; elapsed?: number }[]>([])
-  
+  const [workbenchPanel, setWorkbenchPanel] = useState<string | null>(null)
+
   const { runAgentTask } = useOfficeWebSocket({
     onMessage: (msg) => {
       if (msg.type === 'agent_log' && bossPanelAgent && msg.agent_name === bossPanelAgent.id) {
@@ -2058,6 +2061,11 @@ export default function PixelOfficePage() {
           agentStats={agentStatsRef.current.get(bossPanelAgent.id)}
         />
       )}
+      <WorkbenchDock onOpen={(id) => setWorkbenchPanel(id)} />
+      <WorkbenchDrawer
+        panel={workbenchPanel}
+        onClose={() => setWorkbenchPanel(null)}
+      />
       {/* Quest Board */}
       {showQuestBoard && (
         <QuestBoard onClose={() => setShowQuestBoard(false)} />
