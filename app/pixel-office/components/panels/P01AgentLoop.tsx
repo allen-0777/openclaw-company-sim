@@ -1,7 +1,7 @@
 // app/pixel-office/components/panels/P01AgentLoop.tsx
 'use client'
 
-import { useState, useEffect, useCallback, ReactNode } from 'react'
+import { useState, useEffect, useCallback, useRef, ReactNode } from 'react'
 import { JsonPreview } from '../JsonPreview'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -44,12 +44,14 @@ export function P01AgentLoop({ activeTab, renderSaveBar }: P01AgentLoopProps) {
   const [jsonValid, setJsonValid] = useState(true)
   const [expandedId, setExpandedIdInternal] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  const [deleteTimerId, setDeleteTimerId] = useState<ReturnType<typeof setTimeout> | null>(null)
   const [newAgent, setNewAgent] = useState<Partial<AgentConfig>>({})
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const showToast = useCallback((type: ToastState['type'], message: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     setToast({ type, message })
-    setTimeout(() => setToast(null), type === 'success' ? 2000 : 4000)
+    toastTimerRef.current = setTimeout(() => setToast(null), type === 'success' ? 2000 : 4000)
   }, [])
 
   const loadData = useCallback(async () => {
@@ -81,6 +83,13 @@ export function P01AgentLoop({ activeTab, renderSaveBar }: P01AgentLoopProps) {
 
   useEffect(() => { loadData() }, [loadData])
 
+  useEffect(() => {
+    return () => {
+      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    }
+  }, [])
+
   const handleSave = useCallback(async () => {
     if (!rawConfig || !jsonValid) return
     setSaving(true)
@@ -107,15 +116,15 @@ export function P01AgentLoop({ activeTab, renderSaveBar }: P01AgentLoopProps) {
   }, [rawConfig, editedList, jsonValid, showToast])
 
   function clearDeleteConfirm() {
-    if (deleteTimerId) clearTimeout(deleteTimerId)
+    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current)
     setDeleteConfirm(null)
-    setDeleteTimerId(null)
+    deleteTimerRef.current = null
   }
 
   function beginDeleteConfirm(agentId: string) {
     clearDeleteConfirm()
     setDeleteConfirm(agentId)
-    setDeleteTimerId(setTimeout(() => setDeleteConfirm(null), 3000))
+    deleteTimerRef.current = setTimeout(() => setDeleteConfirm(null), 3000)
   }
 
   function finalizeDelete(agentId: string) {
