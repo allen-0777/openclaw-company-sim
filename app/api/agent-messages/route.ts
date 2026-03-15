@@ -22,9 +22,23 @@ function extractUserText(content: unknown[]): string {
     const b = block as Record<string, unknown>;
     if (b.type !== "text" || typeof b.text !== "string") continue;
     let text = b.text;
-    // Strip leading metadata prefix like "[Sat 2026-03-14 22:26 GMT+8] " or "[Sender (untrusted metadata)...] "
+
+    // Strip multi-line "Sender (untrusted metadata):" block + fenced JSON that precedes the actual message
+    // Format: "Sender (untrusted metadata):\n```json\n{...}\n```\n\n[timestamp] actual message"
+    if (text.startsWith("Sender")) {
+      // Find the closing fence (```) after the opening one, then skip past it
+      const firstFence = text.indexOf("```");
+      if (firstFence !== -1) {
+        const secondFence = text.indexOf("```", firstFence + 3);
+        if (secondFence !== -1) {
+          text = text.slice(secondFence + 3).trimStart();
+        }
+      }
+    }
+
+    // Strip leading timestamp prefix like "[Sat 2026-03-14 22:26 GMT+8] "
     const metaEnd = text.indexOf("] ");
-    if (text.startsWith("[") && metaEnd > 0) {
+    if (text.startsWith("[") && metaEnd > 0 && metaEnd < 60) {
       text = text.slice(metaEnd + 2);
     }
     return text.trim();
@@ -38,7 +52,13 @@ function extractAssistantText(content: unknown[]): string {
     if (!block || typeof block !== "object") continue;
     const b = block as Record<string, unknown>;
     if (b.type === "text" && typeof b.text === "string") {
-      parts.push(b.text.trim());
+      let text = b.text.trim();
+      // Strip <final>...</final> wrapper tags from assistant responses
+      const finalMatch = text.match(/^<final>([\s\S]*)<\/final>$/);
+      if (finalMatch) {
+        text = finalMatch[1].trim();
+      }
+      parts.push(text);
     }
   }
   return parts.join("\n");
